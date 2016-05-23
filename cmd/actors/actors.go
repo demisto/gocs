@@ -2,15 +2,15 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
 	"os"
-
-	"bytes"
-	"encoding/json"
-	"github.com/demisto/gocs"
 	"strings"
+
+	"github.com/demisto/gocs"
 )
 
 var (
@@ -57,11 +57,12 @@ func addStringList(s string, list *[]string) {
 
 func main() {
 	flag.Parse()
-	cs, err := gocs.New(gocs.SetErrorLog(log.New(os.Stderr, "", log.Lshortfile)), gocs.SetCredentials(id, key))
-	check(err)
+	initFuncs := []gocs.OptionFunc{gocs.SetErrorLog(log.New(os.Stderr, "", log.Lshortfile)), gocs.SetCredentials(id, key)}
 	if v {
-		gocs.SetTraceLog(log.New(os.Stderr, "", log.Lshortfile))(cs)
+		initFuncs = append(initFuncs, gocs.SetTraceLog(log.New(os.Stderr, "", log.Lshortfile)))
 	}
+	cs, err := gocs.NewIntel(initFuncs...)
+	check(err)
 	addStringList(origin, &req.Origins)
 	addStringList(country, &req.TargetCountries)
 	addStringList(industry, &req.TargetIndustries)

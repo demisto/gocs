@@ -2,13 +2,13 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
 	"os"
 
-	"bytes"
-	"encoding/json"
 	"github.com/demisto/gocs"
 )
 
@@ -51,16 +51,16 @@ func check(e error) {
 
 func main() {
 	flag.Parse()
-	cs, err := gocs.New(gocs.SetErrorLog(log.New(os.Stderr, "", log.Lshortfile)), gocs.SetCredentials(id, key))
-	check(err)
+	initFuncs := []gocs.OptionFunc{gocs.SetErrorLog(log.New(os.Stderr, "", log.Lshortfile)), gocs.SetCredentials(id, key)}
 	if v {
-		gocs.SetTraceLog(log.New(os.Stderr, "", log.Lshortfile))(cs)
+		initFuncs = append(initFuncs, gocs.SetTraceLog(log.New(os.Stderr, "", log.Lshortfile)))
 	}
+	cs, err := gocs.NewIntel(initFuncs...)
+	check(err)
 	var b bytes.Buffer
 	req := &gocs.IndicatorRequest{Parameter: param, Filter: filter, Value: value, Page: page, PerPage: perPage}
 	if sort != "" {
-		req.Sort.Name = sort
-		req.Sort.Ascending = asc
+		req.Sort = &gocs.SortField{Name: sort, Ascending: asc}
 	}
 	check(cs.IndicatorsJSON(req, &b))
 	// Just for the indentation...
