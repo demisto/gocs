@@ -288,6 +288,20 @@ func (h *Host) DeleteIOCs(ids []string) (resp *SearchIOCsResponse, err error) {
 	return
 }
 
+// DeviceSearch ...
+func (h *Host) DeviceSearch(filter string, query string) (resp *SearchIOCsResponse, err error) {
+	resp = &SearchIOCsResponse{}
+	params := url.Values{}
+	if len(filter) > 0 {
+		params.Add("filter",filter)
+	}
+	if len(query) > 0 {
+		params.Add("q",query)
+	}
+	err = h.do("GET", "devices/queries/devices/v1", params, nil, resp, h.authFunc())
+	return
+}
+
 // Resolve ...
 func (h *Host) Resolve(ids []string, toState string) (resp *ResolveResponse, err error) {
 	resp = &ResolveResponse{}
